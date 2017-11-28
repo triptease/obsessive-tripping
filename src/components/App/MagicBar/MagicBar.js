@@ -7,6 +7,8 @@ import AddButton from './AddButton/AddButton'
 
 const Container = styled.section`
   display: flex;
+  padding: 1rem 0;
+  align-items: center;
 `
 
 const categories = ['book', 'film', 'article', 'podcast']

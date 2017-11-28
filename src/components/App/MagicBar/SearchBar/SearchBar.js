@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 
 class SearchBar extends PureComponent {
   state = {
-    value: 's'
+    value: ''
   }
 
   onChange = event => {
