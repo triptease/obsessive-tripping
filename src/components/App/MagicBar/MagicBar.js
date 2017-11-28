@@ -9,12 +9,27 @@ const Container = styled.section`
   display: flex;
 `
 
+const categories = ['book', 'film', 'article', 'podcast']
+
 class MagicBar extends PureComponent {
+  state = {
+    activeCategory: 'article'
+  }
+
+  setActiveCategory = activeCategory => {
+    this.setState({ activeCategory })
+  }
+
   render() {
+    const { activeCategory } = this.state
     return (
       <Container>
-        <CategorySelector />
-        <SearchBar />
+        <CategorySelector
+          activeCategory={activeCategory}
+          categories={categories}
+          setActiveCategory={this.setActiveCategory}
+        />
+        <SearchBar category={activeCategory} />
         <AddButton />
       </Container>
     )
