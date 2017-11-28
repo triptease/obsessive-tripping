@@ -8,10 +8,8 @@ class CategorySelector extends PureComponent {
   render() {
     const { activeCategory, categories } = this.props
     return (
-      <select onChange={this.onChange}>
-        {categories.map(category => (
-          <option selected={category === activeCategory}>{category}</option>
-        ))}
+      <select onChange={this.onChange} value={activeCategory}>
+        {categories.map(category => <option key={category}>{category}</option>)}
       </select>
     )
   }

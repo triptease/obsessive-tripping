@@ -7,7 +7,7 @@ class App extends Component {
     return [
       <header key="header">Booktease</header>,
       <MagicBar key="magic-bar" />,
-      <div>book list</div>
+      <div key="book-list">book list</div>
     ]
   }
 }
