@@ -1,5 +1,5 @@
 {
-  "name": "booktease",
+  "name": "obsessive-tripping",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -23,9 +23,10 @@
     "prop-types": "^15.6.0"
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,json,css}": [
-      "prettier --write",
-      "git add"
-    ]
+    "src/**/*.{js,jsx,json,css}": ["prettier --write", "git add"]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:triptease/obsessive-tripping.git"
   }
 }
