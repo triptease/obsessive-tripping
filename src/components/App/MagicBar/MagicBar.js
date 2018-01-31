@@ -36,6 +36,15 @@ class MagicBar extends PureComponent {
     this.setState({ title })
   }
 
+  onKeyDown = event => {
+    if (!event) return
+    if (event.key && event.key === 'Enter') {
+      event.target.blur()
+      event.preventDefault()
+      this.onAddObsession()
+    }
+  }
+
   render() {
     const { activeCategory, title } = this.state
     return (
@@ -49,6 +58,7 @@ class MagicBar extends PureComponent {
           category={activeCategory}
           value={title}
           onChange={this.onChange}
+          onKeyDown={this.onKeyDown}
         />
         <AddButton onClick={this.onAddObsession} />
       </Container>

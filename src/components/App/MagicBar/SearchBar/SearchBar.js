@@ -12,13 +12,14 @@ class SearchBar extends PureComponent {
   }
 
   render() {
-    const { category, value } = this.props
+    const { category, value, onKeyDown } = this.props
 
     return (
       <input
         placeholder={`Search for ${category}`}
         value={value}
         onChange={this.onChange}
+        onKeyDown={onKeyDown}
       />
     )
   }
