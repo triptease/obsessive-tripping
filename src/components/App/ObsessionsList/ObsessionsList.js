@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
+import { map } from 'lodash'
 
 import Obsession from './Obsession/Obsession'
 
@@ -14,7 +15,7 @@ class ObsessionsList extends PureComponent {
     const { obsessions, onObsessionScore } = this.props
     return (
       <Container>
-        {obsessions.map(({ score, title, id }) => (
+        {map(obsessions, ({ score, title, id }) => (
           <Obsession
             title={title}
             score={score}

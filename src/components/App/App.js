@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import Header from './Header/Header'
 import MagicBar from './MagicBar/MagicBar'
 import ObsessionsList from './ObsessionsList/ObsessionsList'
-import dbObsessions from '../../db/obsessions'
+import { db } from '../../firebase'
 
 const Container = styled.main`
   display: flex;
@@ -15,11 +15,23 @@ const Container = styled.main`
 
 class App extends Component {
   state = {
-    obsessions: []
+    obsessions: {}
   }
 
+  watchObsessions = () => {
+    db.collection('obsessions').onSnapshot(querySnapshot => {
+      const newObsessions = {}
+      querySnapshot.forEach(function(doc) {
+        newObsessions[doc.id] = { id: doc.id, ...doc.data() }
+      })
+      this.setState(({ obsessions }) => ({
+        obsessions: { ...obsessions, ...newObsessions }
+      }))
+    })
+  }
   componentDidMount() {
-    this.setState({ obsessions: dbObsessions })
+    // todo: query firestore to get the obsessions
+    this.watchObsessions()
   }
 
   updateObsessionScore = (state, id, score) => ({
