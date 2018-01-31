@@ -2,7 +2,8 @@ import React, { PureComponent } from 'react'
 
 class AddButton extends PureComponent {
   render() {
-    return <button>+</button>
+    const { onClick } = this.props
+    return <button onClick={onClick}>+</button>
   }
 }
 

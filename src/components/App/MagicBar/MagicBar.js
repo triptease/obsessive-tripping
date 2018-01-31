@@ -13,17 +13,31 @@ const Container = styled.section`
 
 const categories = ['book', 'film', 'article', 'podcast']
 
+let id = 1
 class MagicBar extends PureComponent {
   state = {
-    activeCategory: 'article'
+    activeCategory: 'article',
+    title: ''
   }
 
   setActiveCategory = activeCategory => {
     this.setState({ activeCategory })
   }
 
+  onAddObsession = () => {
+    const { addObsession } = this.props
+    const { activeCategory, title } = this.state
+    const obsession = { id, title, category: activeCategory, score: 1 }
+    addObsession(obsession)
+    id++
+  }
+
+  onChange = title => {
+    this.setState({ title })
+  }
+
   render() {
-    const { activeCategory } = this.state
+    const { activeCategory, title } = this.state
     return (
       <Container>
         <CategorySelector
@@ -31,8 +45,12 @@ class MagicBar extends PureComponent {
           categories={categories}
           setActiveCategory={this.setActiveCategory}
         />
-        <SearchBar category={activeCategory} />
-        <AddButton />
+        <SearchBar
+          category={activeCategory}
+          value={title}
+          onChange={this.onChange}
+        />
+        <AddButton onClick={this.onAddObsession} />
       </Container>
     )
   }
