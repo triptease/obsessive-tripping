@@ -21,6 +21,8 @@ class App extends Component {
     obsessions: {}
   }
 
+  unsubscribeCategories
+
   static getCategoriesCounts(obsessions) {
     return reduce(
       obsessions,
@@ -34,7 +36,7 @@ class App extends Component {
     )
   }
 
-  watchObsessions = () => {
+  watchObsessions = () =>
     db.collection('obsessions').onSnapshot(querySnapshot => {
       const newObsessions = {}
       querySnapshot.forEach(function(doc) {
@@ -52,10 +54,13 @@ class App extends Component {
         }
       })
     })
-  }
 
   componentDidMount() {
-    this.watchObsessions()
+    this.unsubscribeCategories = this.watchObsessions()
+  }
+
+  componentWillUnmount() {
+    this.unsubscribeCategories && this.unsubscribeCategories()
   }
 
   updateObsessionScore = (state, id, score) => ({
