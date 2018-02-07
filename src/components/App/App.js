@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
+import { reduce } from 'lodash'
 
+import Filters from './Filters/Filters'
 import Header from './Header/Header'
 import MagicBar from './MagicBar/MagicBar'
 import ObsessionsList from './ObsessionsList/ObsessionsList'
@@ -15,7 +17,21 @@ const Container = styled.main`
 
 class App extends Component {
   state = {
+    availableCategories: ['all'],
     obsessions: {}
+  }
+
+  static getCategoriesCounts(obsessions) {
+    return reduce(
+      obsessions,
+      (accumulator, obsession) => {
+        accumulator[obsession.category] = accumulator[obsession.category]
+          ? accumulator[obsession.category] + 1
+          : 1
+        return accumulator
+      },
+      {}
+    )
   }
 
   watchObsessions = () => {
@@ -24,13 +40,21 @@ class App extends Component {
       querySnapshot.forEach(function(doc) {
         newObsessions[doc.id] = { id: doc.id, ...doc.data() }
       })
-      this.setState(({ obsessions }) => ({
-        obsessions: { ...obsessions, ...newObsessions }
-      }))
+      this.setState(({ obsessions: prevObsessions }) => {
+        const obsessions = { ...prevObsessions, ...newObsessions }
+        const availableCategories = [
+          'all',
+          ...Object.keys(App.getCategoriesCounts(obsessions))
+        ]
+        return {
+          availableCategories,
+          obsessions
+        }
+      })
     })
   }
+
   componentDidMount() {
-    // todo: query firestore to get the obsessions
     this.watchObsessions()
   }
 
@@ -53,11 +77,12 @@ class App extends Component {
   }
 
   render() {
-    const { obsessions } = this.state
+    const { availableCategories, obsessions } = this.state
     return (
       <Container>
         <Header />
         <MagicBar addObsession={this.addObsession} />
+        <Filters categories={availableCategories} />
         <ObsessionsList
           obsessions={obsessions}
           onObsessionScore={this.onObsessionScore}

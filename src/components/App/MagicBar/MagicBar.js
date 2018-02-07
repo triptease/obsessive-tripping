@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 
-import CategorySelector from './CategorySelector/CategorySelector'
+import CategorySelector from '../CategorySelector/CategorySelector'
 import SearchBar from './SearchBar/SearchBar'
 import AddButton from './AddButton/AddButton'
 
