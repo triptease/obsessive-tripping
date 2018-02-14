@@ -1,5 +1,10 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
+import styled from 'styled-components'
+
+const ScoringButton = styled.button`
+  margin-left: 4px;
+`
 
 class Obsession extends PureComponent {
   static propTypes = {
@@ -22,16 +27,16 @@ class Obsession extends PureComponent {
     return (
       <div>
         {title} | Score: {typeof score !== 'undefined' ? score : 'N/A'}
-        <button onClick={this.onLikeClick}>
+        <ScoringButton onClick={this.onLikeClick}>
           <span role="img" aria-label="thumbs up">
             👍
           </span>
-        </button>
-        <button onClick={this.onDislikeClick}>
+        </ScoringButton>
+        <ScoringButton onClick={this.onDislikeClick}>
           <span role="img" aria-label="thumbs up">
             👎
           </span>
-        </button>
+        </ScoringButton>
       </div>
     )
   }

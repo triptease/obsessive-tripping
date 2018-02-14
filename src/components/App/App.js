@@ -4,9 +4,11 @@ import { filter, reduce } from 'lodash'
 
 import Filters from './Filters/Filters'
 import Header from './Header/Header'
+import Login from './Login/Login'
+import Logout from './Logout/Logout'
 import MagicBar from './MagicBar/MagicBar'
 import ObsessionsList from './ObsessionsList/ObsessionsList'
-import { db } from '../../firebase'
+import { auth, db } from '../../firebase'
 
 const Container = styled.main`
   display: flex;
@@ -22,7 +24,7 @@ class App extends Component {
     filteredCategory: 'all'
   }
 
-  unsubscribeCategories
+  unsubscribeObsessions
 
   static getCategoriesCounts(obsessions) {
     return reduce(
@@ -56,12 +58,27 @@ class App extends Component {
       })
     })
 
+  watchAuth = () => {
+    auth.onAuthStateChanged(authUser => {
+      if (authUser) {
+        const { displayName, email, photoURL, uid } = authUser
+        this.setState({
+          user: { displayName, email, photoURL, uid }
+        })
+      } else {
+        this.setState({ user: undefined })
+      }
+    })
+  }
+
   componentDidMount() {
-    this.unsubscribeCategories = this.watchObsessions()
+    this.unsubscribeObsessions = this.watchObsessions()
+    this.unsubscribeAuth = this.watchAuth()
   }
 
   componentWillUnmount() {
-    this.unsubscribeCategories && this.unsubscribeCategories()
+    this.unsubscribeObsessions && this.unsubscribeObsessions()
+    this.unsubscribeAuth && this.unsubscribeAuth()
   }
 
   onObsessionScore = (id, score) => {
@@ -80,7 +97,12 @@ class App extends Component {
   }
 
   render() {
-    const { availableCategories, obsessions, filteredCategory } = this.state
+    const {
+      availableCategories,
+      obsessions,
+      filteredCategory,
+      user
+    } = this.state
     const visibleObsessions =
       filteredCategory === 'all'
         ? obsessions
@@ -99,6 +121,7 @@ class App extends Component {
           obsessions={visibleObsessions}
           onObsessionScore={this.onObsessionScore}
         />
+        {user ? <Logout /> : <Login />}
       </Container>
     )
   }

@@ -7,4 +7,7 @@ firebase.initializeApp({
   projectId: 'obsessive-trippin'
 })
 
+export const GoogleAuthProvider = new firebase.auth.GoogleAuthProvider()
+export const auth = firebase.auth()
+
 export const db = firebase.firestore()

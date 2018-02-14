@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
-import { map } from 'lodash'
+import { map, orderBy } from 'lodash'
 
 import Obsession from './Obsession/Obsession'
 
@@ -15,15 +15,18 @@ class ObsessionsList extends PureComponent {
     const { obsessions, onObsessionScore } = this.props
     return (
       <Container>
-        {map(obsessions, ({ score, title, id }) => (
-          <Obsession
-            title={title}
-            score={score}
-            key={id}
-            id={id}
-            onScore={onObsessionScore}
-          />
-        ))}
+        {map(
+          orderBy(obsessions, ['score'], ['desc']),
+          ({ score, title, id }) => (
+            <Obsession
+              title={title}
+              score={score}
+              key={id}
+              id={id}
+              onScore={onObsessionScore}
+            />
+          )
+        )}
       </Container>
     )
   }
