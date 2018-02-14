@@ -13,7 +13,6 @@ const Container = styled.section`
 
 const categories = ['book', 'film', 'article', 'podcast']
 
-let id = 1
 class MagicBar extends PureComponent {
   state = {
     activeCategory: 'article',
@@ -27,9 +26,8 @@ class MagicBar extends PureComponent {
   onAddObsession = () => {
     const { addObsession } = this.props
     const { activeCategory, title } = this.state
-    const obsession = { id, title, category: activeCategory, score: 1 }
+    const obsession = { title, category: activeCategory, score: 1 }
     addObsession(obsession)
-    id++
   }
 
   onChange = title => {

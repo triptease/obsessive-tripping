@@ -63,22 +63,15 @@ class App extends Component {
     this.unsubscribeCategories && this.unsubscribeCategories()
   }
 
-  updateObsessionScore = (state, id, score) => ({
-    ...state,
-    obsessions: state.obsessions.map(
-      obsession => (obsession.id !== id ? obsession : { ...obsession, score })
-    )
-  })
-
-  onObsessionScore = (id, newScore) => {
-    this.setState(state => this.updateObsessionScore(state, id, newScore))
+  onObsessionScore = (id, score) => {
+    db
+      .collection('obsessions')
+      .doc(id)
+      .update({ score })
   }
 
   addObsession = newObsession => {
-    this.setState(({ obsessions }) => {
-      const newObsessions = obsessions.concat([newObsession])
-      return { obsessions: newObsessions }
-    })
+    db.collection('obsessions').add(newObsession)
   }
 
   render() {
