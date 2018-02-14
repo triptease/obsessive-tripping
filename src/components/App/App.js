@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
-import { reduce } from 'lodash'
+import { filter, reduce } from 'lodash'
 
 import Filters from './Filters/Filters'
 import Header from './Header/Header'
@@ -18,7 +18,8 @@ const Container = styled.main`
 class App extends Component {
   state = {
     availableCategories: ['all'],
-    obsessions: {}
+    obsessions: {},
+    filteredCategory: 'all'
   }
 
   unsubscribeCategories
@@ -74,15 +75,28 @@ class App extends Component {
     db.collection('obsessions').add(newObsession)
   }
 
+  setFilteredCategory = filteredCategory => {
+    this.setState({ filteredCategory })
+  }
+
   render() {
-    const { availableCategories, obsessions } = this.state
+    const { availableCategories, obsessions, filteredCategory } = this.state
+    const visibleObsessions =
+      filteredCategory === 'all'
+        ? obsessions
+        : filter(obsessions, ({ category }) => category === filteredCategory)
+
     return (
       <Container>
         <Header />
         <MagicBar addObsession={this.addObsession} />
-        <Filters categories={availableCategories} />
+        <Filters
+          categories={availableCategories}
+          filteredCategory={filteredCategory}
+          setFilteredCategory={this.setFilteredCategory}
+        />
         <ObsessionsList
-          obsessions={obsessions}
+          obsessions={visibleObsessions}
           onObsessionScore={this.onObsessionScore}
         />
       </Container>

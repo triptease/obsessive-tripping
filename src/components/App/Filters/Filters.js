@@ -3,24 +3,15 @@ import React, { PureComponent } from 'react'
 import CategorySelector from '../CategorySelector/CategorySelector'
 
 class Filters extends PureComponent {
-  state = {
-    activeCategory: 'article'
-  }
-
-  setActiveCategory = activeCategory => {
-    this.setState({ activeCategory })
-  }
-
   render() {
-    const { categories } = this.props
-    const { activeCategory } = this.state
+    const { categories, filteredCategory, setFilteredCategory } = this.props
     return (
       <div>
         <span>Show</span>{' '}
         <CategorySelector
-          activeCategory={activeCategory}
+          activeCategory={filteredCategory}
           categories={categories}
-          setActiveCategory={this.setActiveCategory}
+          setActiveCategory={setFilteredCategory}
         />
       </div>
     )
