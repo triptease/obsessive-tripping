@@ -25,6 +25,7 @@ class App extends Component {
   }
 
   unsubscribeObsessions
+  unsubscribeAuth
 
   static getCategoriesCounts(obsessions) {
     return reduce(
@@ -61,10 +62,15 @@ class App extends Component {
   watchAuth = () => {
     auth.onAuthStateChanged(authUser => {
       if (authUser) {
-        const { displayName, email, photoURL, uid } = authUser
-        this.setState({
-          user: { displayName, email, photoURL, uid }
-        })
+        const { uid } = authUser
+        db
+          .collection('users')
+          .doc(uid)
+          .get()
+          .then(doc => {
+            const user = { id: doc.id, ...doc.data() }
+            this.setState({ user })
+          })
       } else {
         this.setState({ user: undefined })
       }
