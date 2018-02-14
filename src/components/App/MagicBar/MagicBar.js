@@ -26,7 +26,11 @@ class MagicBar extends PureComponent {
   onAddObsession = () => {
     const { addObsession } = this.props
     const { activeCategory, title } = this.state
-    const obsession = { title, category: activeCategory, score: 1 }
+    const obsession = {
+      title,
+      category: activeCategory,
+      score: 1
+    }
     addObsession(obsession)
   }
 

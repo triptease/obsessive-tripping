@@ -8,7 +8,7 @@ import Login from './Login/Login'
 import Logout from './Logout/Logout'
 import MagicBar from './MagicBar/MagicBar'
 import ObsessionsList from './ObsessionsList/ObsessionsList'
-import { auth, db } from '../../firebase'
+import { auth, db, serverTimestamp } from '../../firebase'
 
 const Container = styled.main`
   display: flex;
@@ -89,7 +89,9 @@ class App extends Component {
   }
 
   addObsession = newObsession => {
-    db.collection('obsessions').add(newObsession)
+    db
+      .collection('obsessions')
+      .add({ timestamp: serverTimestamp, ...newObsession })
   }
 
   setFilteredCategory = filteredCategory => {
