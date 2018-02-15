@@ -22,7 +22,8 @@ class App extends Component {
   state = {
     availableCategories: ['all'],
     obsessions: {},
-    filteredCategory: 'all'
+    filteredCategory: 'all',
+    users: {}
   }
 
   unsubscribeObsessions
@@ -44,9 +45,16 @@ class App extends Component {
   watchObsessions = () =>
     db.collection('obsessions').onSnapshot(querySnapshot => {
       const newObsessions = {}
-      querySnapshot.forEach(function(doc) {
-        newObsessions[doc.id] = { id: doc.id, ...doc.data() }
+      const newUserRefs = []
+      querySnapshot.forEach(doc => {
+        const { users } = this.state
+        const obsession = { id: doc.id, ...doc.data() }
+        newObsessions[obsession.id] = obsession
+        if (obsession.submitterRef && !users[obsession.submitterRef.id]) {
+          newUserRefs.push(obsession.submitterRef)
+        }
       })
+
       this.setState(({ obsessions: prevObsessions }) => {
         const obsessions = { ...prevObsessions, ...newObsessions }
         const availableCategories = [
@@ -57,6 +65,15 @@ class App extends Component {
           availableCategories,
           obsessions
         }
+      })
+
+      const newUserPromises = []
+      newUserRefs.forEach(userRef => {
+        newUserPromises.push(userRef.get())
+      })
+      Promise.all(newUserPromises).then(docs => {
+        const newUsers = docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        this.setState(({ users }) => ({ users: { ...users, ...newUsers } }))
       })
     })
 
@@ -70,10 +87,13 @@ class App extends Component {
           .get()
           .then(doc => {
             const user = { id: doc.id, ...doc.data() }
-            this.setState({ user })
+            this.setState(({ users }) => ({
+              currentUserId: user.id,
+              users: { ...users, [user.id]: user }
+            }))
           })
       } else {
-        this.setState({ user: undefined })
+        this.setState({ currentUserId: undefined })
       }
     })
   }
@@ -108,14 +128,17 @@ class App extends Component {
   render() {
     const {
       availableCategories,
-      obsessions,
+      currentUserId,
       filteredCategory,
-      user
+      obsessions,
+      users
     } = this.state
     const visibleObsessions =
       filteredCategory === 'all'
         ? obsessions
         : filter(obsessions, ({ category }) => category === filteredCategory)
+
+    const currentUser = currentUserId && users[currentUserId]
 
     return (
       <Container>
@@ -129,13 +152,14 @@ class App extends Component {
         <ObsessionsList
           obsessions={visibleObsessions}
           onObsessionScore={this.onObsessionScore}
+          submitters={users}
         />
-        {user ? <Logout /> : <Login />}
-        {user ? (
+        {currentUser ? <Logout /> : <Login />}
+        {currentUser ? (
           <MiniProfile
-            displayName={user.displayName}
-            email={user.email}
-            photoURL={user.photoURL}
+            displayName={currentUser.displayName}
+            email={currentUser.email}
+            photoURL={currentUser.photoURL}
           />
         ) : null}
       </Container>

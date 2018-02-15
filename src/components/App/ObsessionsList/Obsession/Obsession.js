@@ -6,6 +6,10 @@ const ScoringButton = styled.button`
   margin-left: 4px;
 `
 
+const Byline = styled.aside`
+  font-size: 0.8rem;
+`
+
 class Obsession extends PureComponent {
   static propTypes = {
     score: PropTypes.number,
@@ -23,7 +27,7 @@ class Obsession extends PureComponent {
   }
 
   render() {
-    const { score, title } = this.props
+    const { score, title, submitterName } = this.props
     return (
       <div>
         {title} | Score: {typeof score !== 'undefined' ? score : 'N/A'}
@@ -37,6 +41,7 @@ class Obsession extends PureComponent {
             👎
           </span>
         </ScoringButton>
+        {submitterName ? <Byline>Submitted by: {submitterName}</Byline> : null}
       </div>
     )
   }

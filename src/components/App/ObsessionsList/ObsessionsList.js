@@ -11,21 +11,29 @@ const Container = styled.ul`
 `
 
 class ObsessionsList extends PureComponent {
+  getSubmitter(submitters, submitterRef) {
+    return (submitterRef && submitters[submitterRef.id]) || {}
+  }
+
   render() {
-    const { obsessions, onObsessionScore } = this.props
+    const { obsessions, onObsessionScore, submitters } = this.props
     return (
       <Container>
         {map(
           orderBy(obsessions, ['score'], ['desc']),
-          ({ score, title, id }) => (
-            <Obsession
-              title={title}
-              score={score}
-              key={id}
-              id={id}
-              onScore={onObsessionScore}
-            />
-          )
+          ({ score, title, id, submitterRef }) => {
+            const { displayName } = this.getSubmitter(submitters, submitterRef)
+            return (
+              <Obsession
+                title={title}
+                score={score}
+                key={id}
+                id={id}
+                onScore={onObsessionScore}
+                submitterName={displayName}
+              />
+            )
+          }
         )}
       </Container>
     )
