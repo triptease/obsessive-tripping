@@ -46,13 +46,13 @@ class App extends Component {
   watchObsessions = () =>
     db.collection('obsessions').onSnapshot(querySnapshot => {
       const newObsessions = {}
-      const newUserRefs = []
+      const newUserPromises = []
       querySnapshot.forEach(doc => {
         const { users } = this.state
         const obsession = { id: doc.id, ...doc.data() }
         newObsessions[obsession.id] = obsession
         if (obsession.submitterRef && !users[obsession.submitterRef.id]) {
-          newUserRefs.push(obsession.submitterRef)
+          newUserPromises.push(obsession.submitterRef.get())
         }
       })
 
@@ -68,13 +68,16 @@ class App extends Component {
         }
       })
 
-      const newUserPromises = []
-      newUserRefs.forEach(userRef => {
-        newUserPromises.push(userRef.get())
-      })
       Promise.all(newUserPromises).then(docs => {
-        const newUsers = docs.map(doc => ({ id: doc.id, ...doc.data() }))
-        this.setState(({ users }) => ({ users: { ...users, ...newUsers } }))
+        this.setState(({ users }) => ({
+          users: docs.reduce(
+            (acc, doc) => {
+              acc[doc.id] = { id: doc.id, ...doc.data() }
+              return acc
+            },
+            { ...users }
+          )
+        }))
       })
     })
 
