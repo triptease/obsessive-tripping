@@ -23,7 +23,8 @@ class App extends Component {
     availableCategories: ['all'],
     obsessions: {},
     filteredCategory: 'all',
-    users: {}
+    users: {},
+    isLoadingAuth: true
   }
 
   unsubscribeObsessions
@@ -89,11 +90,12 @@ class App extends Component {
             const user = { id: doc.id, ...doc.data() }
             this.setState(({ users }) => ({
               currentUserId: user.id,
-              users: { ...users, [user.id]: user }
+              users: { ...users, [user.id]: user },
+              isLoadingAuth: false
             }))
           })
       } else {
-        this.setState({ currentUserId: undefined })
+        this.setState({ currentUserId: undefined, isLoadingAuth: false })
       }
     })
   }
@@ -116,9 +118,12 @@ class App extends Component {
   }
 
   addObsession = newObsession => {
-    db
-      .collection('obsessions')
-      .add({ timestamp: serverTimestamp, ...newObsession })
+    const { currentUserId } = this.state
+    db.collection('obsessions').add({
+      timestamp: serverTimestamp,
+      submitterRef: db.collection('users').doc(currentUserId),
+      ...newObsession
+    })
   }
 
   setFilteredCategory = filteredCategory => {
@@ -130,6 +135,7 @@ class App extends Component {
       availableCategories,
       currentUserId,
       filteredCategory,
+      isLoadingAuth,
       obsessions,
       users
     } = this.state
@@ -143,7 +149,7 @@ class App extends Component {
     return (
       <Container>
         <Header />
-        <MagicBar addObsession={this.addObsession} />
+        {currentUser ? <MagicBar addObsession={this.addObsession} /> : null}
         <Filters
           categories={availableCategories}
           filteredCategory={filteredCategory}
@@ -154,7 +160,7 @@ class App extends Component {
           onObsessionScore={this.onObsessionScore}
           submitters={users}
         />
-        {currentUser ? <Logout /> : <Login />}
+        {!isLoadingAuth ? currentUser ? <Logout /> : <Login /> : null}
         {currentUser ? (
           <MiniProfile
             displayName={currentUser.displayName}
