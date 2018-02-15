@@ -9,6 +9,7 @@ import Logout from './Logout/Logout'
 import MagicBar from './MagicBar/MagicBar'
 import ObsessionsList from './ObsessionsList/ObsessionsList'
 import { auth, db, serverTimestamp } from '../../firebase'
+import MiniProfile from './MiniProfile/MiniProfile'
 
 const Container = styled.main`
   display: flex;
@@ -130,6 +131,13 @@ class App extends Component {
           onObsessionScore={this.onObsessionScore}
         />
         {user ? <Logout /> : <Login />}
+        {user ? (
+          <MiniProfile
+            displayName={user.displayName}
+            email={user.email}
+            photoURL={user.photoURL}
+          />
+        ) : null}
       </Container>
     )
   }
