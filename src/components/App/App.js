@@ -10,6 +10,7 @@ import MagicBar from './MagicBar/MagicBar'
 import ObsessionsList from './ObsessionsList/ObsessionsList'
 import { auth, db, serverTimestamp } from '../../firebase'
 import MiniProfile from './MiniProfile/MiniProfile'
+import getSlackURL from '../../utils/getSlackURL'
 
 const Container = styled.main`
   display: flex;
@@ -42,9 +43,6 @@ class App extends Component {
       {}
     )
   }
-
-  static getSlackURL = ({ slack }) =>
-    slack && `slack://user?team=${slack.teamId}&id=${slack.id}`
 
   addDocsToUsers = docs => {
     this.setState(({ users }) => ({
@@ -214,7 +212,7 @@ class App extends Component {
           <MiniProfile
             displayName={currentUser.displayName}
             email={currentUser.email}
-            slackURL={App.getSlackURL(currentUser)}
+            slackURL={getSlackURL(currentUser)}
             photoURL={currentUser.photoURL}
           />
         ) : null}
