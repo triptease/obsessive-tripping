@@ -43,6 +43,18 @@ class App extends Component {
     )
   }
 
+  addDocsToUsers = docs => {
+    this.setState(({ users }) => ({
+      users: docs.reduce(
+        (acc, doc) => {
+          acc[doc.id] = { id: doc.id, ...doc.data() }
+          return acc
+        },
+        { ...users }
+      )
+    }))
+  }
+
   watchObsessions = () =>
     db.collection('obsessions').onSnapshot(querySnapshot => {
       const newObsessions = {}
@@ -68,17 +80,7 @@ class App extends Component {
         }
       })
 
-      Promise.all(newUserPromises).then(docs => {
-        this.setState(({ users }) => ({
-          users: docs.reduce(
-            (acc, doc) => {
-              acc[doc.id] = { id: doc.id, ...doc.data() }
-              return acc
-            },
-            { ...users }
-          )
-        }))
-      })
+      Promise.all(newUserPromises).then(this.addDocsToUsers)
     })
 
   handleAuthUser = authUser => {

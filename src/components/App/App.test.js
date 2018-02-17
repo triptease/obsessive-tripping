@@ -179,3 +179,66 @@ describe('handleAuthUser', () => {
     })
   })
 })
+
+describe('addDocsToUsers', () => {
+  let component
+
+  beforeEach(() => {
+    component = shallow(<App />)
+  })
+
+  it('adds given docs to users state', () => {
+    expect(component.state('users')).toEqual({})
+
+    const docs = [
+      { id: 'me', data: jest.fn(() => ({ displayName: 'The Goddamn Batman' })) }
+    ]
+    component.instance().addDocsToUsers(docs)
+
+    expect(component.state('users')).toEqual({
+      me: { displayName: 'The Goddamn Batman', id: 'me' }
+    })
+
+    const docsB = [
+      {
+        id: 'anotherSubmitter',
+        data: jest.fn(() => ({ displayName: 'Izzy' }))
+      },
+      { id: 'elena', data: jest.fn(() => ({ displayName: 'Elena Example' })) }
+    ]
+    component.instance().addDocsToUsers(docsB)
+
+    expect(component.state('users')).toEqual({
+      me: { displayName: 'The Goddamn Batman', id: 'me' },
+      anotherSubmitter: { displayName: 'Izzy', id: 'anotherSubmitter' },
+      elena: { displayName: 'Elena Example', id: 'elena' }
+    })
+  })
+
+  it('overwrites existing users in the state', () => {
+    component.setState({
+      users: {
+        me: { displayName: 'The Goddamn Batman', id: 'me' },
+        anotherSubmitter: { displayName: 'Izzy', id: 'anotherSubmitter' },
+        elena: { displayName: 'Elena Example', id: 'elena' }
+      }
+    })
+
+    const docs = [
+      {
+        id: 'me',
+        data: jest.fn(() => ({
+          displayName: 'Bruce Wayne',
+          photoURL: 'thebat.png'
+        }))
+      }
+    ]
+    component.instance().addDocsToUsers(docs)
+
+    expect(component.state('users')).toEqual({
+      me: { displayName: 'Bruce Wayne', photoURL: 'thebat.png', id: 'me' },
+      anotherSubmitter: { displayName: 'Izzy', id: 'anotherSubmitter' },
+      elena: { displayName: 'Elena Example', id: 'elena' }
+    })
+  })
+})
