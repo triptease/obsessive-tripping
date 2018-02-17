@@ -17,17 +17,18 @@ class MiniProfile extends PureComponent {
   static propTypes = {
     displayName: PropTypes.string.isRequired,
     email: PropTypes.string.isRequired,
-    photoURL: PropTypes.string.isRequired
+    photoURL: PropTypes.string.isRequired,
+    slackURL: PropTypes.string
   }
 
   render() {
-    const { displayName, email, photoURL } = this.props
+    const { displayName, email, photoURL, slackURL } = this.props
     const title = `Avatar of ${displayName}`
     return (
       <Container>
         <Avatar src={photoURL} title={title} alt={title} />
         <div>
-          <a href={`mailto:${email}`}>{displayName}</a>
+          <a href={slackURL || `mailto:${email}`}>{displayName}</a>
         </div>
       </Container>
     )

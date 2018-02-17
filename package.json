@@ -24,6 +24,7 @@
     "enzyme-adapter-react-16": "^1.1.1",
     "firebase-tools": "^3.17.4",
     "husky": "^0.14.3",
+    "jest-fetch-mock": "^1.4.1",
     "lint-staged": "^5.0.0",
     "prettier": "^1.8.2",
     "prop-types": "^15.6.0",
