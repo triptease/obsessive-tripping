@@ -1,6 +1,10 @@
 import firebase from 'firebase'
 import 'firebase/firestore'
 
+if (!process.env.REACT_APP_FIREBASE_API_KEY) {
+  throw new Error('No Firebase API key configured!')
+}
+
 firebase.initializeApp({
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: 'obsessive-trippin.firebaseapp.com',

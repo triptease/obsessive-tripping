@@ -43,6 +43,18 @@ class App extends Component {
     )
   }
 
+  addDocsToUsers = docs => {
+    this.setState(({ users }) => ({
+      users: docs.reduce(
+        (acc, doc) => {
+          acc[doc.id] = { id: doc.id, ...doc.data() }
+          return acc
+        },
+        { ...users }
+      )
+    }))
+  }
+
   watchObsessions = () =>
     db.collection('obsessions').onSnapshot(querySnapshot => {
       const newObsessions = {}
@@ -68,39 +80,32 @@ class App extends Component {
         }
       })
 
-      Promise.all(newUserPromises).then(docs => {
-        this.setState(({ users }) => ({
-          users: docs.reduce(
-            (acc, doc) => {
-              acc[doc.id] = { id: doc.id, ...doc.data() }
-              return acc
-            },
-            { ...users }
-          )
-        }))
-      })
+      Promise.all(newUserPromises).then(this.addDocsToUsers)
     })
 
+  handleAuthUser = authUser => {
+    if (authUser) {
+      const { uid } = authUser
+      return db
+        .collection('users')
+        .doc(uid)
+        .get()
+        .then(doc => {
+          const user = { id: doc.id, ...doc.data() }
+          this.setState(({ users }) => ({
+            currentUserId: user.id,
+            users: { ...users, [user.id]: user },
+            isLoadingAuth: false
+          }))
+        })
+        .catch(console.log)
+    } else {
+      this.setState({ currentUserId: undefined, isLoadingAuth: false })
+    }
+  }
+
   watchAuth = () => {
-    auth.onAuthStateChanged(authUser => {
-      if (authUser) {
-        const { uid } = authUser
-        db
-          .collection('users')
-          .doc(uid)
-          .get()
-          .then(doc => {
-            const user = { id: doc.id, ...doc.data() }
-            this.setState(({ users }) => ({
-              currentUserId: user.id,
-              users: { ...users, [user.id]: user },
-              isLoadingAuth: false
-            }))
-          })
-      } else {
-        this.setState({ currentUserId: undefined, isLoadingAuth: false })
-      }
-    })
+    auth.onAuthStateChanged(this.handleAuthUser)
   }
 
   componentDidMount() {
