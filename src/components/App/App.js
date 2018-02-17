@@ -81,26 +81,29 @@ class App extends Component {
       })
     })
 
+  handleAuthUser = authUser => {
+    if (authUser) {
+      const { uid } = authUser
+      return db
+        .collection('users')
+        .doc(uid)
+        .get()
+        .then(doc => {
+          const user = { id: doc.id, ...doc.data() }
+          this.setState(({ users }) => ({
+            currentUserId: user.id,
+            users: { ...users, [user.id]: user },
+            isLoadingAuth: false
+          }))
+        })
+        .catch(console.log)
+    } else {
+      this.setState({ currentUserId: undefined, isLoadingAuth: false })
+    }
+  }
+
   watchAuth = () => {
-    auth.onAuthStateChanged(authUser => {
-      if (authUser) {
-        const { uid } = authUser
-        db
-          .collection('users')
-          .doc(uid)
-          .get()
-          .then(doc => {
-            const user = { id: doc.id, ...doc.data() }
-            this.setState(({ users }) => ({
-              currentUserId: user.id,
-              users: { ...users, [user.id]: user },
-              isLoadingAuth: false
-            }))
-          })
-      } else {
-        this.setState({ currentUserId: undefined, isLoadingAuth: false })
-      }
-    })
+    auth.onAuthStateChanged(this.handleAuthUser)
   }
 
   componentDidMount() {

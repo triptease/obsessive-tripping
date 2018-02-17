@@ -7,7 +7,7 @@
     "lodash": "^4.17.4",
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
-    "react-scripts": "1.0.17",
+    "react-scripts": "1.1.1",
     "reset-css": "^2.2.1",
     "styled-components": "^2.2.3"
   },
@@ -20,14 +20,20 @@
     "eject": "react-scripts eject"
   },
   "devDependencies": {
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
     "firebase-tools": "^3.17.4",
     "husky": "^0.14.3",
     "lint-staged": "^5.0.0",
     "prettier": "^1.8.2",
-    "prop-types": "^15.6.0"
+    "prop-types": "^15.6.0",
+    "react-test-renderer": "^16.2.0"
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,json,css}": ["prettier --write", "git add"]
+    "src/**/*.{js,jsx,json,css}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "repository": {
     "type": "git",
