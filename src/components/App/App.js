@@ -43,6 +43,10 @@ class App extends Component {
     )
   }
 
+  static getVoteId(obsessionId, userId) {
+    return `${obsessionId}|${userId}`
+  }
+
   addDocsToUsers = docs => {
     this.setState(({ users }) => ({
       users: docs.reduce(
@@ -118,17 +122,22 @@ class App extends Component {
     this.unsubscribeAuth && this.unsubscribeAuth()
   }
 
-  onObsessionScore = (id, score) => {
+  onObsessionVote = (id, { userId, value }) => {
     db
-      .collection('obsessions')
-      .doc(id)
-      .update({ score })
+      .collection('votes')
+      .doc(App.getVoteId(id, userId))
+      .set({
+        value,
+        updatedAt: serverTimestamp,
+        obsessionRef: db.collection('obsessions').doc(id),
+        userRef: db.collection('users').doc(userId)
+      })
   }
 
   addObsession = newObsession => {
     const { currentUserId } = this.state
     db.collection('obsessions').add({
-      timestamp: serverTimestamp,
+      createdAt: serverTimestamp,
       submitterRef: db.collection('users').doc(currentUserId),
       ...newObsession
     })
@@ -165,8 +174,9 @@ class App extends Component {
         />
         <ObsessionsList
           obsessions={visibleObsessions}
-          onObsessionScore={this.onObsessionScore}
+          onObsessionVote={this.onObsessionVote}
           submitters={users}
+          userId={currentUserId}
         />
         {!isLoadingAuth ? currentUser ? <Logout /> : <Login /> : null}
         {currentUser ? (

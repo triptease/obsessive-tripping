@@ -12,19 +12,25 @@ const Byline = styled.aside`
 
 class Obsession extends PureComponent {
   static propTypes = {
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    onVote: PropTypes.func,
     score: PropTypes.number,
-    title: PropTypes.string.isRequired
+    userId: PropTypes.string
   }
 
-  onLikeClick = () => {
-    const { onScore, id, score } = this.props
-    onScore(id, score + 1)
+  onVote = value => {
+    const { onVote, id, userId } = this.props
+    if (!userId) {
+      console.log('You need to be logged-in to vote!')
+    } else {
+      onVote(id, { userId, value })
+    }
   }
 
-  onDislikeClick = () => {
-    const { onScore, id, score } = this.props
-    onScore(id, score - 1)
-  }
+  onLikeClick = this.onVote.bind(undefined, 1)
+
+  onDislikeClick = this.onVote.bind(undefined, -1)
 
   render() {
     const { score, title, submitterName } = this.props
