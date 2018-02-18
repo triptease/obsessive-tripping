@@ -12,8 +12,11 @@ const Byline = styled.aside`
 
 class Obsession extends PureComponent {
   static propTypes = {
+    title: PropTypes.string.isRequired,
     score: PropTypes.number,
-    title: PropTypes.string.isRequired
+    submitterEmail: PropTypes.string,
+    submitterName: PropTypes.string,
+    submitterSlackURL: PropTypes.string
   }
 
   onLikeClick = () => {
@@ -27,7 +30,13 @@ class Obsession extends PureComponent {
   }
 
   render() {
-    const { score, title, submitterName } = this.props
+    const {
+      score,
+      title,
+      submitterName,
+      submitterSlackURL,
+      submitterEmail
+    } = this.props
     return (
       <div>
         {title} | Score: {typeof score !== 'undefined' ? score : 'N/A'}
@@ -41,7 +50,14 @@ class Obsession extends PureComponent {
             👎
           </span>
         </ScoringButton>
-        {submitterName ? <Byline>Submitted by: {submitterName}</Byline> : null}
+        {submitterName ? (
+          <Byline>
+            Submitted by:{' '}
+            <a href={submitterSlackURL || `mailto:${submitterEmail}`}>
+              {submitterName}
+            </a>
+          </Byline>
+        ) : null}
       </div>
     )
   }

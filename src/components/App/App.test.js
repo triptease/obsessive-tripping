@@ -81,6 +81,15 @@ describe('handleAuthUser', () => {
     let mockDoc
     let mockUser
 
+    beforeAll(() => {
+      fetch.mockResponse(
+        JSON.stringify({
+          ok: true,
+          user: { id: 'slackId', team_id: 'slackTeamId' }
+        })
+      )
+    })
+
     beforeEach(() => {
       mockUser = {
         displayName: 'Timmy Tester',
@@ -93,7 +102,8 @@ describe('handleAuthUser', () => {
             id,
             data: jest.fn(() => mockUser)
           })
-        )
+        ),
+        update: jest.fn(() => Promise.resolve())
       }))
       db.collection.mockReturnValue({
         doc: mockDoc,
@@ -138,7 +148,7 @@ describe('handleAuthUser', () => {
       expect(component.state('isLoadingAuth')).toBe(false)
     })
 
-    it('adds the auth user to the users list', async () => {
+    it('adds the auth user to the users list, adding slack info as soon as it gets it', async () => {
       const authUser = { uid: 'timmyTester' }
 
       await component.instance().handleAuthUser(authUser)
@@ -173,7 +183,11 @@ describe('handleAuthUser', () => {
           displayName: 'Timmy Tester',
           email: 'timmy@tester.com',
           id: 'timmyTester',
-          photoURL: 'http://someurl.png'
+          photoURL: 'http://someurl.png',
+          slack: {
+            id: 'slackId',
+            teamId: 'slackTeamId'
+          }
         }
       })
     })
