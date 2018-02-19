@@ -4,7 +4,8 @@ import Adapter from 'enzyme-adapter-react-16'
 const db = {
   collection: jest.fn(() => ({
     doc: jest.fn(() => ({ get: jest.fn(() => Promise.resolve({})) })),
-    onSnapshot: jest.fn()
+    onSnapshot: jest.fn(),
+    where: jest.fn()
   }))
 }
 const auth = { onAuthStateChanged: jest.fn() }

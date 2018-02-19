@@ -24,6 +24,7 @@ class App extends Component {
     obsessions: {},
     filteredCategory: 'all',
     users: {},
+    obsessionVotesList: {},
     isLoadingAuth: true
   }
 
@@ -63,7 +64,7 @@ class App extends Component {
     db.collection('obsessions').onSnapshot(querySnapshot => {
       const newObsessions = {}
       const newUserPromises = []
-      querySnapshot.forEach(doc => {
+      querySnapshot.docChanges.forEach(({ doc }) => {
         const { users } = this.state
         const obsession = { id: doc.id, ...doc.data() }
         newObsessions[obsession.id] = obsession
@@ -87,12 +88,33 @@ class App extends Component {
       Promise.all(newUserPromises).then(this.addDocsToUsers)
     })
 
+  watchVotes = userRef =>
+    db
+      .collection('votes')
+      .where('userRef', '==', userRef)
+      .onSnapshot(querySnapshot => {
+        const newVotes = {}
+        querySnapshot.docChanges.forEach(({ type, doc }) => {
+          switch (type) {
+            case 'added':
+            case 'modified':
+              console.log(doc.data(), doc.data().obsessionRef.id)
+              newVotes[doc.id] = doc.data().value
+              break
+            default:
+              break
+          }
+        })
+        this.setState(({ obsessionVotesList }) => ({
+          obsessionVotesList: { ...obsessionVotesList, ...newVotes }
+        }))
+      })
+
   handleAuthUser = authUser => {
     if (authUser) {
       const { uid } = authUser
-      return db
-        .collection('users')
-        .doc(uid)
+      const userRef = db.collection('users').doc(uid)
+      return userRef
         .get()
         .then(doc => {
           const user = { id: doc.id, ...doc.data() }
@@ -101,6 +123,7 @@ class App extends Component {
             users: { ...users, [user.id]: user },
             isLoadingAuth: false
           }))
+          this.unsubscribeVotes = this.watchVotes(userRef)
         })
         .catch(console.log)
     } else {
@@ -120,6 +143,7 @@ class App extends Component {
   componentWillUnmount() {
     this.unsubscribeObsessions && this.unsubscribeObsessions()
     this.unsubscribeAuth && this.unsubscribeAuth()
+    this.unsubscribeVotes && this.unsubscribeVotes()
   }
 
   onObsessionVote = (id, { userId, value }) => {

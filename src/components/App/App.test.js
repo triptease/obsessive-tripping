@@ -95,10 +95,9 @@ describe('handleAuthUser', () => {
           })
         )
       }))
-      db.collection.mockReturnValue({
-        doc: mockDoc,
-        onSnapshot: jest.fn()
-      })
+      const mockCollection = { doc: mockDoc, onSnapshot: jest.fn() }
+      mockCollection.where = jest.fn(() => mockCollection)
+      db.collection.mockReturnValue(mockCollection)
     })
 
     it('gets information on the given auth user from the db', () => {
