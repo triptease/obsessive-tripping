@@ -25,6 +25,7 @@ class App extends Component {
     obsessions: {},
     filteredCategory: 'all',
     users: {},
+    obsessionVotesList: {},
     isLoadingAuth: true
   }
 
@@ -44,6 +45,10 @@ class App extends Component {
     )
   }
 
+  static getVoteId(obsessionId, userId) {
+    return `${obsessionId}|${userId}`
+  }
+
   addDocsToUsers = docs => {
     this.setState(({ users }) => ({
       users: docs.reduce(
@@ -60,7 +65,7 @@ class App extends Component {
     db.collection('obsessions').onSnapshot(querySnapshot => {
       const newObsessions = {}
       const newUserPromises = []
-      querySnapshot.forEach(doc => {
+      querySnapshot.docChanges.forEach(({ doc }) => {
         const { users } = this.state
         const obsession = { id: doc.id, ...doc.data() }
         newObsessions[obsession.id] = obsession
@@ -83,6 +88,28 @@ class App extends Component {
 
       Promise.all(newUserPromises).then(this.addDocsToUsers)
     })
+
+  watchVotes = userRef =>
+    db
+      .collection('votes')
+      .where('userRef', '==', userRef)
+      .onSnapshot(querySnapshot => {
+        const newVotes = {}
+        querySnapshot.docChanges.forEach(({ type, doc }) => {
+          switch (type) {
+            case 'added':
+            case 'modified':
+              console.log(doc.data(), doc.data().obsessionRef.id)
+              newVotes[doc.id] = doc.data().value
+              break
+            default:
+              break
+          }
+        })
+        this.setState(({ obsessionVotesList }) => ({
+          obsessionVotesList: { ...obsessionVotesList, ...newVotes }
+        }))
+      })
 
   handleSlackResponse = (id, slackResponse) => {
     if (!slackResponse || !slackResponse.ok) {
@@ -122,9 +149,8 @@ class App extends Component {
   handleAuthUser = authUser => {
     if (authUser) {
       const { uid } = authUser
-      return db
-        .collection('users')
-        .doc(uid)
+      const userRef = db.collection('users').doc(uid)
+      return userRef
         .get()
         .then(doc => {
           const user = { id: doc.id, ...doc.data() }
@@ -137,6 +163,8 @@ class App extends Component {
           if (!user.slack) {
             this.getSlackInfo(user)
           }
+
+          this.unsubscribeVotes = this.watchVotes(userRef)
         })
         .catch(console.log)
     } else {
@@ -156,19 +184,25 @@ class App extends Component {
   componentWillUnmount() {
     this.unsubscribeObsessions && this.unsubscribeObsessions()
     this.unsubscribeAuth && this.unsubscribeAuth()
+    this.unsubscribeVotes && this.unsubscribeVotes()
   }
 
-  onObsessionScore = (id, score) => {
+  onObsessionVote = (id, { userId, value }) => {
     db
-      .collection('obsessions')
-      .doc(id)
-      .update({ score })
+      .collection('votes')
+      .doc(App.getVoteId(id, userId))
+      .set({
+        value,
+        updatedAt: serverTimestamp,
+        obsessionRef: db.collection('obsessions').doc(id),
+        userRef: db.collection('users').doc(userId)
+      })
   }
 
   addObsession = newObsession => {
     const { currentUserId } = this.state
     db.collection('obsessions').add({
-      timestamp: serverTimestamp,
+      createdAt: serverTimestamp,
       submitterRef: db.collection('users').doc(currentUserId),
       ...newObsession
     })
@@ -204,8 +238,9 @@ class App extends Component {
         />
         <ObsessionsList
           obsessions={visibleObsessions}
-          onObsessionScore={this.onObsessionScore}
+          onObsessionVote={this.onObsessionVote}
           submitters={users}
+          userId={currentUserId}
         />
         {!isLoadingAuth ? currentUser ? <Logout /> : <Login /> : null}
         {currentUser ? (

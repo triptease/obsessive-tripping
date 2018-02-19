@@ -4,7 +4,8 @@ import fetch from 'jest-fetch-mock'
 const db = {
   collection: jest.fn(() => ({
     doc: jest.fn(() => ({ get: jest.fn(() => Promise.resolve({})) })),
-    onSnapshot: jest.fn()
+    onSnapshot: jest.fn(),
+    where: jest.fn()
   }))
 }
 const auth = { onAuthStateChanged: jest.fn() }

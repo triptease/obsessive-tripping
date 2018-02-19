@@ -17,7 +17,7 @@ class ObsessionsList extends PureComponent {
   }
 
   render() {
-    const { obsessions, onObsessionScore, submitters } = this.props
+    const { obsessions, onObsessionVote, userId, submitters } = this.props
     return (
       <Container>
         {map(
@@ -30,7 +30,8 @@ class ObsessionsList extends PureComponent {
                 score={score}
                 key={id}
                 id={id}
-                onScore={onObsessionScore}
+                onVote={onObsessionVote}
+                userId={userId}
                 submitterName={submitter.displayName}
                 submitterEmail={submitter.email}
                 submitterSlackURL={getSlackURL(submitter)}

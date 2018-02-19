@@ -31,7 +31,7 @@
     "react-test-renderer": "^16.2.0"
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,json,css}": [
+    "{src,functions/src}/**/*.{js,jsx,json,css}": [
       "prettier --write",
       "git add"
     ]
