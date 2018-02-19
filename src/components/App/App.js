@@ -10,6 +10,7 @@ import MagicBar from './MagicBar/MagicBar'
 import ObsessionsList from './ObsessionsList/ObsessionsList'
 import { auth, db, serverTimestamp } from '../../firebase'
 import MiniProfile from './MiniProfile/MiniProfile'
+import getSlackURL from '../../utils/getSlackURL'
 
 const Container = styled.main`
   display: flex;
@@ -110,6 +111,41 @@ class App extends Component {
         }))
       })
 
+  handleSlackResponse = (id, slackResponse) => {
+    if (!slackResponse || !slackResponse.ok) {
+      if (slackResponse && slackResponse.error === 'users_not_found') {
+        console.log('Are you logging in with a non-triptease email?')
+      } else {
+        console.log(slackResponse)
+      }
+    } else {
+      const slack = {
+        id: slackResponse.user.id,
+        teamId: slackResponse.user.team_id
+      }
+      db
+        .collection('users')
+        .doc(id)
+        .update({ slack })
+        .then(() =>
+          this.setState(({ users }) => ({
+            users: { ...users, [id]: { ...users[id], slack } }
+          }))
+        )
+    }
+  }
+
+  getSlackInfo = ({ email, id }) => {
+    fetch(
+      `https://slack.com/api/users.lookupByEmail?email=${email}&token=${
+        process.env.REACT_APP_SLACK_TOKEN
+      }`
+    )
+      .then(response => response.json())
+      .then(this.handleSlackResponse.bind(undefined, id))
+      .catch(console.log)
+  }
+
   handleAuthUser = authUser => {
     if (authUser) {
       const { uid } = authUser
@@ -123,6 +159,11 @@ class App extends Component {
             users: { ...users, [user.id]: user },
             isLoadingAuth: false
           }))
+
+          if (!user.slack) {
+            this.getSlackInfo(user)
+          }
+
           this.unsubscribeVotes = this.watchVotes(userRef)
         })
         .catch(console.log)
@@ -186,7 +227,6 @@ class App extends Component {
         : filter(obsessions, ({ category }) => category === filteredCategory)
 
     const currentUser = currentUserId && users[currentUserId]
-
     return (
       <Container>
         <Header />
@@ -207,6 +247,7 @@ class App extends Component {
           <MiniProfile
             displayName={currentUser.displayName}
             email={currentUser.email}
+            slackURL={getSlackURL(currentUser)}
             photoURL={currentUser.photoURL}
           />
         ) : null}

@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { map, orderBy } from 'lodash'
 
 import Obsession from './Obsession/Obsession'
+import getSlackURL from '../../../utils/getSlackURL'
 
 const Container = styled.ul`
   border: 1px solid #ffffff;
@@ -22,7 +23,7 @@ class ObsessionsList extends PureComponent {
         {map(
           orderBy(obsessions, ['score'], ['desc']),
           ({ score, title, id, submitterRef }) => {
-            const { displayName } = this.getSubmitter(submitters, submitterRef)
+            const submitter = this.getSubmitter(submitters, submitterRef)
             return (
               <Obsession
                 title={title}
@@ -30,8 +31,10 @@ class ObsessionsList extends PureComponent {
                 key={id}
                 id={id}
                 onVote={onObsessionVote}
-                submitterName={displayName}
                 userId={userId}
+                submitterName={submitter.displayName}
+                submitterEmail={submitter.email}
+                submitterSlackURL={getSlackURL(submitter)}
               />
             )
           }

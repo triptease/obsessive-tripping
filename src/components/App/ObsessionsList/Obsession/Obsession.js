@@ -12,10 +12,12 @@ const Byline = styled.aside`
 
 class Obsession extends PureComponent {
   static propTypes = {
-    id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     onVote: PropTypes.func,
     score: PropTypes.number,
+    submitterEmail: PropTypes.string,
+    submitterName: PropTypes.string,
+    submitterSlackURL: PropTypes.string,
     userId: PropTypes.string
   }
 
@@ -33,7 +35,13 @@ class Obsession extends PureComponent {
   onDislikeClick = this.onVote.bind(undefined, -1)
 
   render() {
-    const { score, title, submitterName } = this.props
+    const {
+      score,
+      title,
+      submitterName,
+      submitterSlackURL,
+      submitterEmail
+    } = this.props
     return (
       <div>
         {title} | Score: {typeof score !== 'undefined' ? score : 'N/A'}
@@ -47,7 +55,14 @@ class Obsession extends PureComponent {
             👎
           </span>
         </ScoringButton>
-        {submitterName ? <Byline>Submitted by: {submitterName}</Byline> : null}
+        {submitterName ? (
+          <Byline>
+            Submitted by:{' '}
+            <a href={submitterSlackURL || `mailto:${submitterEmail}`}>
+              {submitterName}
+            </a>
+          </Byline>
+        ) : null}
       </div>
     )
   }
