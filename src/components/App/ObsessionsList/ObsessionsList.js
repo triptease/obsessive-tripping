@@ -17,7 +17,15 @@ class ObsessionsList extends PureComponent {
   }
 
   render() {
-    const { obsessions, onObsessionVote, userId, submitters } = this.props
+    const {
+      obsessions,
+      obsessionVotesList,
+      onObsessionVote,
+      onObsessionDeleteVote,
+      userId,
+      submitters
+    } = this.props
+
     return (
       <Container>
         {map(
@@ -31,6 +39,8 @@ class ObsessionsList extends PureComponent {
                 key={id}
                 id={id}
                 onVote={onObsessionVote}
+                onDeleteVote={onObsessionDeleteVote}
+                vote={obsessionVotesList[id]}
                 userId={userId}
                 submitterName={submitter.displayName}
                 submitterEmail={submitter.email}

@@ -96,11 +96,15 @@ class App extends Component {
       .onSnapshot(querySnapshot => {
         const newVotes = {}
         querySnapshot.docChanges.forEach(({ type, doc }) => {
+          const obsessionId = doc.data().obsessionRef.id
+
           switch (type) {
             case 'added':
             case 'modified':
-              console.log(doc.data(), doc.data().obsessionRef.id)
-              newVotes[doc.id] = doc.data().value
+              newVotes[obsessionId] = doc.data().value
+              break
+            case 'removed':
+              newVotes[obsessionId] = undefined
               break
             default:
               break
@@ -199,6 +203,13 @@ class App extends Component {
       })
   }
 
+  onObsessionDeleteVote = (id, { userId }) => {
+    db
+      .collection('votes')
+      .doc(App.getVoteId(id, userId))
+      .delete()
+  }
+
   addObsession = newObsession => {
     const { currentUserId } = this.state
     db.collection('obsessions').add({
@@ -219,6 +230,7 @@ class App extends Component {
       filteredCategory,
       isLoadingAuth,
       obsessions,
+      obsessionVotesList,
       users
     } = this.state
     const visibleObsessions =
@@ -239,7 +251,9 @@ class App extends Component {
         <ObsessionsList
           obsessions={visibleObsessions}
           onObsessionVote={this.onObsessionVote}
+          onObsessionDeleteVote={this.onObsessionDeleteVote}
           submitters={users}
+          obsessionVotesList={obsessionVotesList}
           userId={currentUserId}
         />
         {!isLoadingAuth ? currentUser ? <Logout /> : <Login /> : null}
