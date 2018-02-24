@@ -13,7 +13,7 @@
       },
       {
         "source":
-          "**/*.@(jpg|jpeg|gif|png|svg|js|css|eot|otf|ttf|ttc|woff|font.css)",
+          "**/static/**/*.@(jpg|jpeg|gif|png|svg|js|css|eot|otf|ttf|ttc|woff|font.css)",
         "headers": [
           {
             "key": "Cache-Control",
