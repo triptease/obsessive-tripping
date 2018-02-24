@@ -4,6 +4,8 @@ import styled from 'styled-components'
 
 const ScoringButton = styled.button`
   margin-left: 4px;
+  outline: none;
+  ${({ voted }) => voted && 'border: 4px solid gold;'};
 `
 
 const Byline = styled.aside`
@@ -22,11 +24,15 @@ class Obsession extends PureComponent {
   }
 
   onVote = value => {
-    const { onVote, id, userId } = this.props
+    const { onVote, onDeleteVote, id, userId, vote } = this.props
     if (!userId) {
       console.log('You need to be logged-in to vote!')
-    } else {
+      return
+    }
+    if (vote !== value) {
       onVote(id, { userId, value })
+    } else {
+      onDeleteVote(id, { userId })
     }
   }
 
@@ -40,17 +46,18 @@ class Obsession extends PureComponent {
       title,
       submitterName,
       submitterSlackURL,
-      submitterEmail
+      submitterEmail,
+      vote
     } = this.props
     return (
       <div>
         {title} | Score: {typeof score !== 'undefined' ? score : 'N/A'}
-        <ScoringButton onClick={this.onLikeClick}>
+        <ScoringButton onClick={this.onLikeClick} voted={vote === 1}>
           <span role="img" aria-label="thumbs up">
             👍
           </span>
         </ScoringButton>
-        <ScoringButton onClick={this.onDislikeClick}>
+        <ScoringButton onClick={this.onDislikeClick} voted={vote === -1}>
           <span role="img" aria-label="thumbs up">
             👎
           </span>
