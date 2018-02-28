@@ -61,49 +61,62 @@ class App extends Component {
     }))
   }
 
-  watchObsessions = () =>
-    db.collection('obsessions').onSnapshot(querySnapshot => {
-      const newObsessions = {}
-      const deletedObsessionIds = []
+  parseObsessionsSnapshot = querySnapshot => {
+    const newObsessions = {}
+    const deletedObsessionIds = []
+    const newUserPromises = []
 
-      const newUserPromises = []
-      querySnapshot.docChanges.forEach(({ doc, type }) => {
-        const obsession = { id: doc.id, ...doc.data() }
+    querySnapshot.docChanges.forEach(({ doc, type }) => {
+      const obsession = { id: doc.id, ...doc.data() }
 
-        switch (type) {
-          case 'added':
-          case 'modified':
-            const { users } = this.state
-            newObsessions[obsession.id] = obsession
-            if (obsession.submitterRef && !users[obsession.submitterRef.id]) {
-              newUserPromises.push(obsession.submitterRef.get())
-            }
-            break
-          case 'removed':
-            deletedObsessionIds.push(obsession.id)
-            break
-          default:
-            break
-        }
-      })
+      switch (type) {
+        case 'added':
+        case 'modified':
+          const { users } = this.state
+          newObsessions[obsession.id] = obsession
 
-      this.setState(({ obsessions: prevObsessions }) => {
-        const obsessions = {
-          ...omit(prevObsessions, deletedObsessionIds),
-          ...newObsessions
-        }
-        const availableCategories = [
-          'all',
-          ...Object.keys(App.getCategoriesCounts(obsessions))
-        ]
-        return {
-          availableCategories,
-          obsessions
-        }
-      })
-
-      Promise.all(newUserPromises).then(this.addDocsToUsers)
+          if (obsession.submitterRef && !users[obsession.submitterRef.id]) {
+            newUserPromises.push(obsession.submitterRef.get())
+          }
+          break
+        case 'removed':
+          deletedObsessionIds.push(obsession.id)
+          break
+        default:
+          break
+      }
     })
+
+    return { newObsessions, deletedObsessionIds, newUserPromises }
+  }
+
+  handleObsessions = querySnapshot => {
+    const {
+      newObsessions,
+      deletedObsessionIds,
+      newUserPromises
+    } = this.parseObsessionsSnapshot(querySnapshot)
+
+    this.setState(({ obsessions: prevObsessions }) => {
+      const obsessions = {
+        ...omit(prevObsessions, deletedObsessionIds),
+        ...newObsessions
+      }
+      const availableCategories = [
+        'all',
+        ...Object.keys(App.getCategoriesCounts(obsessions))
+      ]
+      return {
+        availableCategories,
+        obsessions
+      }
+    })
+
+    Promise.all(newUserPromises).then(this.addDocsToUsers)
+  }
+
+  watchObsessions = () =>
+    db.collection('obsessions').onSnapshot(this.handleObsessions)
 
   watchVotes = userRef =>
     db

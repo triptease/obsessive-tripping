@@ -254,4 +254,113 @@ describe('addDocsToUsers', () => {
       elena: { displayName: 'Elena Example', id: 'elena' }
     })
   })
+
+  describe('parseObsessionsSnapshot', () => {
+    let parseObsessionsSnapshot
+
+    beforeEach(() => {
+      parseObsessionsSnapshot = component.instance().parseObsessionsSnapshot
+    })
+
+    it('returns the ids of all the deleted obsessions', () => {
+      const data = jest.fn()
+
+      const snapshot = {
+        docChanges: [
+          { doc: { data, id: 'a1' }, type: 'added' },
+          { doc: { data, id: 'm1' }, type: 'modified' },
+          { doc: { data, id: 'm2' }, type: 'modified' },
+          { doc: { data, id: 'r1' }, type: 'removed' },
+          { doc: { data, id: 'r2' }, type: 'removed' },
+          { doc: { data, id: 'a2' }, type: 'added' }
+        ]
+      }
+
+      const { deletedObsessionIds } = parseObsessionsSnapshot(snapshot)
+
+      expect(deletedObsessionIds).toEqual(['r1', 'r2'])
+
+      const snapshotB = {
+        docChanges: [{ doc: { data, id: 'r3' }, type: 'removed' }]
+      }
+
+      const {
+        deletedObsessionIds: deletedObsessionIdsB
+      } = parseObsessionsSnapshot(snapshotB)
+
+      expect(deletedObsessionIdsB).toEqual(['r3'])
+    })
+
+    it('returns all new or updated obsessions in a list by their ids', () => {
+      let rating = 1
+      const data = jest.fn(() => ({ rating: rating++ }))
+
+      const snapshot = {
+        docChanges: [
+          { doc: { data, id: 'a1' }, type: 'added' },
+          { doc: { data, id: 'm1' }, type: 'modified' },
+          { doc: { data, id: 'm2' }, type: 'modified' },
+          { doc: { data, id: 'r1' }, type: 'removed' },
+          { doc: { data, id: 'r2' }, type: 'removed' },
+          { doc: { data, id: 'a2' }, type: 'added' }
+        ]
+      }
+
+      const { newObsessions } = parseObsessionsSnapshot(snapshot)
+
+      expect(newObsessions).toEqual({
+        a1: { id: 'a1', rating: 1 },
+        a2: { id: 'a2', rating: 6 },
+        m1: { id: 'm1', rating: 2 },
+        m2: { id: 'm2', rating: 3 }
+      })
+
+      const snapshotB = {
+        docChanges: [{ doc: { data, id: 'a3' }, type: 'added' }]
+      }
+
+      const { newObsessions: newObsessionsB } = parseObsessionsSnapshot(
+        snapshotB
+      )
+
+      expect(newObsessionsB).toEqual({
+        a3: { id: 'a3', rating: 7 }
+      })
+    })
+
+    it('returns the result of `get`ing all submitters not already in state as users', () => {
+      component.setState({
+        users: {
+          user1: { id: 'user1' },
+          user3: { id: 'user3' }
+        }
+      })
+
+      parseObsessionsSnapshot = component.instance().parseObsessionsSnapshot
+
+      let i = 1
+      const data = jest.fn(() => {
+        const id = `user${i}`
+        i++
+        return {
+          submitterRef: { id, get: jest.fn(() => id) }
+        }
+      })
+
+      const snapshot = {
+        docChanges: [
+          { doc: { data, id: 'a1' }, type: 'added' },
+          { doc: { data, id: 'm1' }, type: 'modified' },
+          { doc: { data, id: 'm2' }, type: 'modified' },
+          { doc: { data, id: 'r1' }, type: 'removed' },
+          { doc: { data, id: 'r2' }, type: 'removed' },
+          { doc: { data, id: 'a2' }, type: 'added' }
+        ]
+      }
+
+      const { newUserPromises } = parseObsessionsSnapshot(snapshot)
+
+      expect(newUserPromises).toEqual(['user2', 'user6'])
+    })
+  })
 })
