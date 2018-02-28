@@ -21,6 +21,7 @@ class ObsessionsList extends PureComponent {
       obsessions,
       obsessionVotesList,
       onObsessionVote,
+      onObsessionDelete,
       onObsessionDeleteVote,
       userId,
       submitters
@@ -39,6 +40,7 @@ class ObsessionsList extends PureComponent {
                 key={id}
                 id={id}
                 onVote={onObsessionVote}
+                onDelete={onObsessionDelete}
                 onDeleteVote={onObsessionDeleteVote}
                 vote={obsessionVotesList[id]}
                 userId={userId}
