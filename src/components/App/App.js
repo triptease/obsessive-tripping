@@ -225,6 +225,13 @@ class App extends Component {
       .collection('obsessions')
       .doc(id)
       .delete()
+      .catch(err => {
+        if (err.message === 'Missing or insufficient permissions.') {
+          console.log('You can only delete the obsessions you have submitted!')
+        } else {
+          console.log(err)
+        }
+      })
   }
 
   onObsessionVote = (id, { userId, value }) => {
