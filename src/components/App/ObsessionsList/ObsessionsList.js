@@ -44,6 +44,7 @@ class ObsessionsList extends PureComponent {
                 onDeleteVote={onObsessionDeleteVote}
                 vote={obsessionVotesList[id]}
                 userId={userId}
+                submitterId={submitter.id}
                 submitterName={submitter.displayName}
                 submitterEmail={submitter.email}
                 submitterSlackURL={getSlackURL(submitter)}

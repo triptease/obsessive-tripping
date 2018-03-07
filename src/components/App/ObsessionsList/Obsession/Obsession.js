@@ -42,6 +42,7 @@ class Obsession extends PureComponent {
     title: PropTypes.string.isRequired,
     onVote: PropTypes.func,
     score: PropTypes.number,
+    submitterId: PropTypes.string,
     submitterEmail: PropTypes.string,
     submitterName: PropTypes.string,
     submitterSlackURL: PropTypes.string,
@@ -74,17 +75,21 @@ class Obsession extends PureComponent {
     const {
       score,
       title,
+      submitterId,
       submitterName,
       submitterSlackURL,
       submitterEmail,
-      vote
+      vote,
+      userId
     } = this.props
     return (
       <div>
         {title} | Score: {typeof score !== 'undefined' ? score : 'N/A'}
         <LikeButton onClick={this.onLikeClick} border={vote === 1} />
         <DislikeButton onClick={this.onDislikeClick} border={vote === -1} />
-        <DeleteButton onClick={this.onDelete} />
+        {userId && userId === submitterId ? (
+          <DeleteButton onClick={this.onDelete} />
+        ) : null}
         {submitterName ? (
           <Byline>
             Submitted by:{' '}
