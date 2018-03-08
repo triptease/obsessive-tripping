@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
-import { filter, reduce } from 'lodash'
+import { filter, omit, reduce } from 'lodash'
 
 import Filters from './Filters/Filters'
 import Header from './Header/Header'
@@ -61,33 +61,62 @@ class App extends Component {
     }))
   }
 
-  watchObsessions = () =>
-    db.collection('obsessions').onSnapshot(querySnapshot => {
-      const newObsessions = {}
-      const newUserPromises = []
-      querySnapshot.docChanges.forEach(({ doc }) => {
-        const { users } = this.state
-        const obsession = { id: doc.id, ...doc.data() }
-        newObsessions[obsession.id] = obsession
-        if (obsession.submitterRef && !users[obsession.submitterRef.id]) {
-          newUserPromises.push(obsession.submitterRef.get())
-        }
-      })
+  parseObsessionsSnapshot = querySnapshot => {
+    const newObsessions = {}
+    const deletedObsessionIds = []
+    const newUserPromises = []
 
-      this.setState(({ obsessions: prevObsessions }) => {
-        const obsessions = { ...prevObsessions, ...newObsessions }
-        const availableCategories = [
-          'all',
-          ...Object.keys(App.getCategoriesCounts(obsessions))
-        ]
-        return {
-          availableCategories,
-          obsessions
-        }
-      })
+    querySnapshot.docChanges.forEach(({ doc, type }) => {
+      const obsession = { id: doc.id, ...doc.data() }
 
-      Promise.all(newUserPromises).then(this.addDocsToUsers)
+      switch (type) {
+        case 'added':
+        case 'modified':
+          const { users } = this.state
+          newObsessions[obsession.id] = obsession
+
+          if (obsession.submitterRef && !users[obsession.submitterRef.id]) {
+            newUserPromises.push(obsession.submitterRef.get())
+          }
+          break
+        case 'removed':
+          deletedObsessionIds.push(obsession.id)
+          break
+        default:
+          break
+      }
     })
+
+    return { newObsessions, deletedObsessionIds, newUserPromises }
+  }
+
+  handleObsessions = querySnapshot => {
+    const {
+      newObsessions,
+      deletedObsessionIds,
+      newUserPromises
+    } = this.parseObsessionsSnapshot(querySnapshot)
+
+    this.setState(({ obsessions: prevObsessions }) => {
+      const obsessions = {
+        ...omit(prevObsessions, deletedObsessionIds),
+        ...newObsessions
+      }
+      const availableCategories = [
+        'all',
+        ...Object.keys(App.getCategoriesCounts(obsessions))
+      ]
+      return {
+        availableCategories,
+        obsessions
+      }
+    })
+
+    Promise.all(newUserPromises).then(this.addDocsToUsers)
+  }
+
+  watchObsessions = () =>
+    db.collection('obsessions').onSnapshot(this.handleObsessions)
 
   watchVotes = userRef =>
     db
@@ -191,6 +220,20 @@ class App extends Component {
     this.unsubscribeVotes && this.unsubscribeVotes()
   }
 
+  onObsessionDelete = id => {
+    db
+      .collection('obsessions')
+      .doc(id)
+      .delete()
+      .catch(err => {
+        if (err.message === 'Missing or insufficient permissions.') {
+          console.log('You can only delete the obsessions you have submitted!')
+        } else {
+          console.log(err)
+        }
+      })
+  }
+
   onObsessionVote = (id, { userId, value }) => {
     db
       .collection('votes')
@@ -251,6 +294,7 @@ class App extends Component {
         <ObsessionsList
           obsessions={visibleObsessions}
           onObsessionVote={this.onObsessionVote}
+          onObsessionDelete={this.onObsessionDelete}
           onObsessionDeleteVote={this.onObsessionDeleteVote}
           submitters={users}
           obsessionVotesList={obsessionVotesList}

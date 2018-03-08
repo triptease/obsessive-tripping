@@ -1,0 +1,12 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read;
+    }
+
+    match /obsessions/{obsession} {
+      allow update, delete: if get(resource.data.submitterRef).id == request.auth.uid;
+      allow create: if request.auth.uid != null;
+    }
+  }
+}

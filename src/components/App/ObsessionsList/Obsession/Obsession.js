@@ -2,11 +2,35 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
-const ScoringButton = styled.button`
+const BorderedButton = styled.button`
   margin-left: 4px;
   outline: none;
-  ${({ voted }) => voted && 'border: 4px solid gold;'};
+  ${({ border }) => border && 'border: 4px solid gold;'};
 `
+
+export const LikeButton = props => (
+  <BorderedButton {...props}>
+    <span role="img" aria-label="thumbs up">
+      👍
+    </span>
+  </BorderedButton>
+)
+
+export const DislikeButton = props => (
+  <BorderedButton {...props}>
+    <span role="img" aria-label="thumbs down">
+      👎
+    </span>
+  </BorderedButton>
+)
+
+export const DeleteButton = props => (
+  <BorderedButton {...props}>
+    <span role="img" aria-label="delete">
+      🗑
+    </span>
+  </BorderedButton>
+)
 
 const Byline = styled.aside`
   font-size: 0.8rem;
@@ -14,9 +38,11 @@ const Byline = styled.aside`
 
 class Obsession extends PureComponent {
   static propTypes = {
+    id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     onVote: PropTypes.func,
     score: PropTypes.number,
+    submitterId: PropTypes.string,
     submitterEmail: PropTypes.string,
     submitterName: PropTypes.string,
     submitterSlackURL: PropTypes.string,
@@ -36,6 +62,11 @@ class Obsession extends PureComponent {
     }
   }
 
+  onDelete = () => {
+    const { onDelete, id } = this.props
+    onDelete(id)
+  }
+
   onLikeClick = this.onVote.bind(undefined, 1)
 
   onDislikeClick = this.onVote.bind(undefined, -1)
@@ -44,24 +75,21 @@ class Obsession extends PureComponent {
     const {
       score,
       title,
+      submitterId,
       submitterName,
       submitterSlackURL,
       submitterEmail,
-      vote
+      vote,
+      userId
     } = this.props
     return (
       <div>
         {title} | Score: {typeof score !== 'undefined' ? score : 'N/A'}
-        <ScoringButton onClick={this.onLikeClick} voted={vote === 1}>
-          <span role="img" aria-label="thumbs up">
-            👍
-          </span>
-        </ScoringButton>
-        <ScoringButton onClick={this.onDislikeClick} voted={vote === -1}>
-          <span role="img" aria-label="thumbs up">
-            👎
-          </span>
-        </ScoringButton>
+        <LikeButton onClick={this.onLikeClick} border={vote === 1} />
+        <DislikeButton onClick={this.onDislikeClick} border={vote === -1} />
+        {userId && userId === submitterId ? (
+          <DeleteButton onClick={this.onDelete} />
+        ) : null}
         {submitterName ? (
           <Byline>
             Submitted by:{' '}

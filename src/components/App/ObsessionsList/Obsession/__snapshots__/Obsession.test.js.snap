@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Obsession renders 1`] = `
+<div>
+  TDD
+   | Score: 
+  N/A
+  <Component
+    border={false}
+    onClick={[Function]}
+  />
+  <Component
+    border={false}
+    onClick={[Function]}
+  />
+  <Component
+    onClick={[Function]}
+  />
+</div>
+`;

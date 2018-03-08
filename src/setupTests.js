@@ -3,7 +3,10 @@ import Adapter from 'enzyme-adapter-react-16'
 import fetch from 'jest-fetch-mock'
 const db = {
   collection: jest.fn(() => ({
-    doc: jest.fn(() => ({ get: jest.fn(() => Promise.resolve({})) })),
+    doc: jest.fn(() => ({
+      get: jest.fn(() => Promise.resolve({})),
+      delete: jest.fn()
+    })),
     onSnapshot: jest.fn(),
     where: jest.fn()
   }))
